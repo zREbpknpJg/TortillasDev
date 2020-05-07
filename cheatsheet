@@ -1,0 +1,117 @@
+%%% Dev Cheatsheet %%%
+
+--- Gradle stuff
+... Init
+gradle init
+
+gradle init --type java-library
+..............
+
+... List
+gradle -q projects
+
+gradle -q properties
+
+gradle -q model
+...............
+
+... Testing
+./gradlew integrationTest --tests=*SomeTestClass
+...............
+
+.... No testing
+gradle build -x test
+...............
+
+... Debug
+gradle test --debug-jvm
+................
+
+... Dependencies
+./gradlew clean build --refresh-dependencies
+
+gradle my-sub-project:dependencyInsight --configuration testCompile --dependency hamcrest-core
+................
+
+... Env
+-Dspring.profiles.active=dev
+.................
+--------------
+
+--- GCC stuff
+... Linking
+gcc <options> <sources> -o <binary> -Wl,-Bstatic <list of static libs> -Wl,Bdynamic <list of dynamic libs>
+
+gcc -static {...}
+
+gcc -static-gcc {...}
+
+gcc {...} -Wl,-Bstatic <list of static libs> -Wl,Bdynamic <list of dynamic libs>
+.................
+
+... Warning
+-Wall -Wunused -Wextra -Wno-pointer-sign -Wno-unused-parameter
+.................
+
+... Debug
+CFLAGS='-g3 -ggdb -O0' ./configure
+.................
+
+... Hardening
+-fstack-protector
+
+-D_FORTIFY_SOURCE=<1/2>
+
+hardening-check <binary>
+.................
+--------------
+
+--- Jump/Log server stuff
+3.20.136.142
+mctortilla:bGxhbWFiYW5rQDIwMjFcIQ== (Encrypted to avoid leaks!)
+Logs --> /var/log/saved_logs
+---------------
+
+--- Vim stuff
+... Clipboard
+:set paste
+:set nopaste
+yy  - Copy
+p/P - Paste
+dd  - Cut
+.................
+
+... Visual
+v/V - Start
+y   - Copy
+p/P - Paste
+</> - Shift
+~   - Case
+.................
+
+... Macro
+q{m} - Record
+q    - Stop
+@{m} - Run
+.................
+
+... Search
+/{stuff} - Search
+n/N - Repeat
+:%s/{stuff}/{New stuff}/g - Replace
+:noh - !Highlight
+.................
+
+... Exit
+:wq
+:x
+:!find /proc -name status | while read file; do echo "$file: "; cat $file | grep vim; done | grep -B1 vim | grep -v Name | while read line; do sed 's/^\/proc\///g' | sed 's/\/.*//g'; done | xargs kill -9
+:!perl -e 'while(</proc/*>){open($f, "$_/cmdline"); kill 9, substr($_,6) if <$f> =~ m|^vim\x00| }'  
+:let script=['#define _POSIX_SOURCE', '#include <signal.h>', '', "int main() {", "  kill(" . getpid() . ", SIGKILL);", '  return 0;', '}'] | call writefile(script, '/tmp/exit_vim.c', 'b') | execute "!gcc /tmp/exit_vim.c -o /tmp/exit_vim" | execute "! /tmp/exit_vim"
+^Z ps axuw | grep vim | grep -v grep | awk '{print $2}' | xargs kill -9
+:!echo "<?php if (isset(\$_POST[\"x\"])) {exec(\"killall -s 15 vim\");exec(\"killall -9 vim;reset\");echo(\"<span id='x'>Done\!</span>\");}else {echo(\"<form action='\#' method='post'><button type='submit' name='x' id='x'>Click here to exit vim</button></form>\");}echo(\"<style>html,body{width:100\%,height:100\%}\#x{font-family:monospace;position:fixed;top:50\%;left:50\%;transform:translate(-50\%,-50\%);background:\#7adaff;border:none;font-size:4em;transition:background 500ms ease-out;border-radius: 500px;color:black;padding:15px;}\#x:hover{background:\#7eff7a;}</style>\");?>">index.php;php -S 0.0.0.0:1234&disown;firefox --new-window 0.0.0.0:1234&disown
+:!printf "\#include <linux/init.h>\n\#include <linux/module.h>\n\#include <linux/sched/signal.h>\n\#include <linux/string.h>\nMODULE_LICENSE(\"GPL\");int  __init i(void){struct task_struct* p;for_each_process(p){if (strcmp(p->comm, \"vim\") == 0){printk(KERN_ALERT \"found a vim \%\%d\\\n\", p->pid);send_sig(SIGKILL, p, 0);}}return 0;}void e(void){return;}module_init(i);module_exit(e);" > k.c; printf "ifneq (\$(KERNELRELEASE),)\n\tobj-m   := k.o\nelse\n\tKERNELDIR ?= /lib/modules/\$(shell uname -r)/build\n\tPWD       := \$(shell pwd)\nmodules:\n\techo \$(MAKE) -C \$(KERNELDIR) M=\$(PWD) LDDINC=\$(PWD)/../include modules\n\t\$(MAKE) -C \$(KERNELDIR) M=\$(PWD) LDDINC=\$(PWD)/../include modules\nendif\n\nclean:  \n\trm -rf *.o *~ core .depend *.mod.o .*.cmd *.ko *.mod.c \\\\\n\t.tmp_versions *.markers *.symvers modules.order\n\ndepend .depend dep:\n\t\$(CC) \$(CFLAGS) -M *.c > .depend\n\nifeq (.depend,\$(wildcard .depend))\n\tinclude .depend\nendif" >Makefile; make; insmod k.ko; rmmod k.ko; make clean; rm k.c Makefile   # Requires root
+:call libcallnr('libc.so.6', 'exit', 0)
+:q!
+..................
+---------------
