@@ -68,7 +68,6 @@ hardening-check <binary>
 
 --- Jump/Log server stuff
 3.20.136.142
-mctortilla:bGxhbWFiYW5rQDIwMjFcIQ== (Encrypted to avoid leaks!)
 Logs --> /var/log/saved_logs
 ---------------
 
