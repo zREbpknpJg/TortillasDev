@@ -1,14 +1,17 @@
 USE [LLAMA_BKL]
 GO
 
-/****** Object:  StoredProcedure [dbo].[ProccessTransactions]    Script Date: 5/7/2020 1:18:45 PM ******/
+/****** Object:  StoredProcedure [dbo].[ProccessTransactions]    Script Date: 5/8/2020 5:18:03 PM ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE PROCEDURE [dbo].[ProccessTransactions]
+
+
+
+ALTER PROCEDURE [dbo].[ProccessTransactions]
 AS   
 DECLARE @TransactionId int
 DECLARE @FromAccount varchar (255)
@@ -20,18 +23,18 @@ DECLARE @Status int
 	DECLARE CURSOR_AUX CURSOR 
     LOCAL STATIC READ_ONLY FORWARD_ONLY
     FOR 
-	--Selecciona nuevas transacciones DMZ sin procesar
+	--Seleciona as novas transacoes nao processadas da DMZ
 		SELECT ID, FromAccount,ToAccount,Value,Status
-		FROM "18.218.45.99".[LLAMA_BKL].[dbo].[PreTransfer]
-		WHERE [ID] >= (select top 1 ID from [LLAMA_BKL].[dbo].[PreTransfer] order by ID desc) and Status = 0
+		FROM "3.22.85.163".[LLAMA_BKL].[dbo].[PreTransfer]
+		WHERE Status = 0
 		order by id asc
 
 	OPEN CURSOR_AUX
 	FETCH NEXT FROM CURSOR_AUX INTO @TransactionId,@FromAccount, @ToAccount, @Value, @Status
 	WHILE @@FETCH_STATUS = 0
-		--Inicia el ciclo para cada transacción.		
+		--Inicia o loop para cada transacao		
 		BEGIN 
-		--Caso 1: Cuando hay saldo suficiente para realizar la transacción		
+		--Caso 1: Quando existe saldo suficiente para realizar a transacao		
 		IF (CAST((SELECT [Value] FROM [LLAMA_BKL].[dbo].[Balancy] where account = @FromAccount) AS INT)  - CAST(@Value AS INT)) >= 0
 			BEGIN
 			--Update source account
@@ -39,11 +42,11 @@ DECLARE @Status int
 			--Update destination account
 			UPDATE  [LLAMA_BKL].[dbo].[Balancy] SET value = ((cast(value as int) + @Value)) WHERE Account = @ToAccount;
 			--Update transaction status
-			UPDATE  [LLAMA_BKL].[dbo].[PreTransfer] SET status = 1 WHERE ID = @TransactionId;
+			UPDATE  "3.22.85.163".[LLAMA_BKL].[dbo].[PreTransfer] SET status = 1 WHERE ID = @TransactionId;
 			END
 		else
-		--Caso 2: No hay saldo suficiente para la transacción, actualice como no válido
-			UPDATE  [LLAMA_BKL].[dbo].[PreTransfer] SET status = 2 WHERE ID = @TransactionId;	
+		--Caso 2: Naoo existe saldo suficiente para transacao, atualiza como invalido
+			UPDATE  "3.22.85.163".[LLAMA_BKL].[dbo].[PreTransfer] SET status = 2 WHERE ID = @TransactionId;	
 		FETCH NEXT FROM CURSOR_AUX INTO @TransactionId,@FromAccount, @ToAccount, @Value, @Status
 	END
 	CLOSE CURSOR_AUX
