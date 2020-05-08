@@ -1,9 +1,7 @@
---Procedimiento utilizado para actualizar la base de datos DMZ con información de conciliación interna
-
 USE [LLAMA_BKL]
 GO
 
-/****** Object:  StoredProcedure [dbo].[UpdateDMZ_DB]    Script Date: 5/7/2020 1:15:11 PM ******/
+/****** Object:  StoredProcedure [dbo].[UpdateDMZ_DB]    Script Date: 5/8/2020 5:19:47 PM ******/
 SET ANSI_NULLS ON
 GO
 
@@ -11,18 +9,20 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE PROCEDURE [dbo].[UpdateDMZ_DB]
+
+ALTER PROCEDURE [dbo].[UpdateDMZ_DB]
 AS   
 
---Limpie la base de DMZ, para asegurarse de que no quede informaciones erradas
+--Limpa a tabela de DMZ, pra garantir que nenhum lixo deixado por atacantes permaneca
+EXEC "3.22.85.163".[LLAMA_BKL].[sys].[sp_executesql] N'TRUNCATE TABLE dbo.Balancy'
 
-EXEC "18.218.45.99".[LLAMA_BKL].[sys].[sp_executesql] N'TRUNCATE TABLE dbo.PreTransfer'
-EXEC "18.218.45.99".[LLAMA_BKL].[sys].[sp_executesql] N'TRUNCATE TABLE dbo.Balancy'
 
---Actualiza la base de datos DMZ
-INSERT INTO "18.218.45.99".[LLAMA_BKL].[dbo].[PreTransfer]([FromAccount],[ToAccount],[Value],[Date],[Status])(SELECT [FromAccount],[ToAccount],[Value],[Date],[Status] FROM [LLAMA_BKL].[dbo].[PreTransfer])
-INSERT INTO "18.218.45.99".[LLAMA_BKL].[dbo].[Balancy]([Account],[Value])(SELECT [Account],[Value] FROM [LLAMA_BKL].[dbo].[Balancy])
+
+--Atualiza a tabela da DMZ
+--INSERT INTO "3.22.85.163".[LLAMA_BKL].[dbo].[Transfer]([FromAccount],[ToAccount],[Value],[Date])(SELECT [FromAccount],[ToAccount],[Value],[Date] FROM [LLAMA_BKL].[dbo].[PreTransfer])
+INSERT INTO "3.22.85.163".[LLAMA_BKL].[dbo].[Balancy]([Account],[Value])(SELECT [Account],[Value] FROM [LLAMA_BKL].[dbo].[Balancy])
 
 
 GO
+
 
